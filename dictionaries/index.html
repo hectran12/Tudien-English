@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Dictionaries English</title>
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'><link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div class="login-form">
+  
+    <h1>Tra cứu từ điển</h1>
+    <div class="content">
+      <div class="input-field">
+        <input type="text" placeholder="ex: hello" autocomplete="nope" name="tuvung">
+      </div>
+      <p class="link" id="result"></p>
+      <div id="google_translate_element"></div>
+    </div>
+    <div class="action">
+      <button onclick="tracuu();" id="tracuu">TRA CỨU</button>
+      <button onclick="dich();" id="ontrans">DỊCH</button>
+    </div>
+    
+</div>
+<!-- partial -->
+
+  <script>
+        let tuvung, result, flag, ontransfirst, trans, tracuubtn, temp;
+        tuvung = document.getElementsByName("tuvung")[0];
+        result = document.getElementById("result");
+        trans = document.getElementById("google_translate_element");
+        ontrans = document.getElementById("ontrans");
+        tracuubtn = document.getElementById("tracuu");
+        flag = false;
+        ontranfirst = false;
+        temp = false;
+        function tracuu() {
+            async function find() {
+                if (tuvung.value != '') {
+                    temp = true;
+                    var promise = new Promise (function (solve, reject) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', 'https://tronghoa.dev/api/dictionaries.php?dict=' + tuvung.value);
+                        xhr.onload = function () {
+                            if (xhr.status == 200) {
+                                try {
+                                    var json = JSON.parse(this.response);
+                                    let definition, valid;
+                                    definition = json.definition;
+                                    valid      = json.valid;
+                                    delay(5);
+                                    
+                                    if (valid) {
+                                        solve(definition);
+                                    } else {
+                                        solve("Không tồn tại từ này trong từ điển!");
+                                    } 
+                                } catch {
+                                    alert("Lỗi truy vấn!");
+                                    window.location.reload()
+                                }
+                                
+                            } else {
+                                reject(xhr.status);
+                            }
+                        }
+                        
+                        xhr.send();
+                    });
+                    
+                    result.innerHTML = await promise;
+                } else {
+                    result.innerHTML = "Vui lòng nhập vào từ vựng";
+                }
+                
+            }
+            
+            if(temp == false) {
+                find();
+                tracuubtn.innerHTML = "Đang tìm..";
+            } else {
+                alert("Đang chạy task!");
+            }
+        }
+        
+        async function delay(timer) {
+            
+            var i = 1;
+            var id = setInterval(function() {
+                if (i >= timer+1) {
+                    temp = false;
+                    tracuubtn.innerHTML = 'TRA CỨU';
+                    clearInterval(id);
+                } else {
+                    tracuubtn.innerHTML = 'Đợi ' + i + "s..";
+                }
+                i++;
+            }, 1000);
+        }
+        async function dich() {
+            if (flag) {
+                flag = false;
+                closeframe();
+                trans.style.display = "none";
+                ontrans.innerHTML = "Dịch";
+            } else {
+                if (ontransfirst) {
+                    
+                    trans.style.display = "block";
+                } else {
+                    
+                    trans.style.display = "block";
+                    new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+                    ontransfirst = true;
+                }
+                flag = true;
+                ontrans.innerHTML = "Tắt dịch";
+            }
+          
+        }
+        
+        async function closeframe () {
+            const frames = window.frames; 
+            for (let i = 0; i < frames.length; i++) {
+                try {
+                    frames[i].document.querySelector("#\\:1\\.close > img").click();
+                } catch {
+                }
+}
+        }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
